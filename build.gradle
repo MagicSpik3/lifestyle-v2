@@ -41,12 +41,19 @@ dependencies {
 	
 }
 
-processResources {
-	inputs.property "version", project.version
 
-	filesMatching("fabric.mod.json") {
-		expand "version": inputs.properties.version
-	}
+processResources {
+    inputs.property "version", project.version
+    // Add this line to make the minecraft_version available
+    inputs.property "minecraft_version", project.minecraft_version
+
+    filesMatching("fabric.mod.json") {
+        expand(
+            "version": project.version,
+            // And add this line to replace it in the file
+            "minecraft_version": project.minecraft_version
+        )
+    }
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -88,3 +95,13 @@ publishing {
 		// retrieving dependencies.
 	}
 }
+
+
+// This task will copy your resource pack into the run directory automatically
+task copyResourcePack(type: Copy) {
+    from "/home/jonny/git/Blue Bees Pack" // <-- IMPORTANT: CHANGE THIS PATH
+    into "run/resourcepacks/Blue Bees Pack"
+}
+
+// Tell the runClient task to run our new copy task first
+runClient.dependsOn(copyResourcePack)
